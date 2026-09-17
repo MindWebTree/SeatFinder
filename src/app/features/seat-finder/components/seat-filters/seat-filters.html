@@ -1,0 +1,143 @@
+<div class="bg-surface rounded-b-2xl overflow-hidden">
+
+  <!-- Quota tabs -->
+  <div class="flex border-b border-white/5">
+    @for (opt of quotaOptions; track opt.value) {
+    <button type="button" (click)="onQuotaChange(opt.value)" class="flex-1 py-3 text-sm font-medium transition-colors"
+      [class]="quota() === opt.value
+          ? 'bg-primary/20 text-white border-b-2 border-primary'
+          : 'text-slate-400 hover:text-slate-200'">
+      {{ opt.label }}
+    </button>
+    }
+  </div>
+
+  <form (ngSubmit)="submit()" class="px-6 py-6 flex flex-col gap-5">
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <label class="flex flex-col gap-1.5">
+        <span class="text-xs tracking-wide text-slate-400 uppercase">Your rank</span>
+        <input type="number" min="1" [ngModel]="rank()" (ngModelChange)="rank.set($event); rankError.set(false)"
+          name="rank" placeholder="e.g. 15150" required
+          class="bg-ink border rounded-lg px-4 py-3 text-slate-100 font-mono text-lg placeholder:text-slate-600 focus:outline-none focus:ring-2 transition-colors"
+          [class.border-red-500]="rankError()" [class.ring-2]="rankError()" [class.ring-red-500\/60]="rankError()"
+          [class.border-primary\/30]="!rankError()" [class.focus\:ring-primary\/60]="!rankError()"
+          [class.focus\:border-primary]="!rankError()" />
+        @if (rankError()) {
+        <span class="text-xs text-red-400 mt-0.5">⚠ Your rank is required to find seats.</span>
+        }
+      </label>
+
+      <label class="flex flex-col gap-1.5">
+        <span class="text-xs tracking-wide text-slate-400 uppercase">Your category</span>
+        <mat-select [ngModel]="category()" (ngModelChange)="category.set($event)" name="category"
+          class="bg-ink border border-primary/30 rounded-lg px-4 py-3 text-slate-100 focus:outline-none">
+          @for (c of categories; track c) {
+          <mat-option [value]="c">{{ c }}</mat-option>
+          }
+        </mat-select>
+      </label>
+    </div>
+
+    <!-- <p class="text-sm text-slate-400 -mt-2">
+      As <span class="font-semibold text-slate-200">{{ category() }}</span> you can take Open seats only.
+    </p> -->
+
+    <div class="flex flex-col gap-2">
+      <span class="text-xs tracking-wide text-slate-400 uppercase">Institute type</span>
+      <mat-button-toggle-group multiple [ngModel]="selectedInstituteTypes()"
+        (ngModelChange)="selectedInstituteTypes.set($event ?? [])" name="instituteTypes"
+        class="flex flex-wrap gap-2 !border-0 !bg-transparent">
+        @for (t of instituteTypes; track t) {
+        <mat-button-toggle [value]="t" class="!rounded-full !border-hero/40 overflow-hidden">
+          {{ t }}
+        </mat-button-toggle>
+        }
+      </mat-button-toggle-group>
+    </div>
+
+    <div class="border-t border-white/5 pt-1 flex flex-col">
+
+      <!-- Course Type filter -->
+      <label class="flex items-center justify-between py-3 border-b border-white/5 cursor-pointer">
+        <span class="text-xs tracking-wide text-slate-400 uppercase">Course type</span>
+        <mat-select [ngModel]="selectedCourseType()" (ngModelChange)="onCourseTypeChange($event)"
+          name="courseType" panelClass="seat-finder-select-panel"
+          class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
+          <mat-select-trigger>{{ selectedCourseType() ?? 'All types' }}</mat-select-trigger>
+          <mat-option [value]="null">All types</mat-option>
+          @for (t of courseTypes; track t) {
+            <mat-option [value]="t">{{ t }}</mat-option>
+          }
+        </mat-select>
+      </label>
+
+      <!-- Clinical Type filter -->
+      <label class="flex items-center justify-between py-3 border-b border-white/5 cursor-pointer">
+        <span class="text-xs tracking-wide text-slate-400 uppercase">Clinical type</span>
+        <mat-select multiple [ngModel]="selectedClinicalTypes()" (ngModelChange)="onClinicalTypeChange($event)"
+          name="clinicalTypes" panelClass="seat-finder-select-panel"
+          class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
+          <mat-select-trigger>
+            {{ selectedClinicalTypes().length === 0 ? 'All' : selectedClinicalTypes().join(', ') }}
+          </mat-select-trigger>
+          @for (ct of clinicalTypes; track ct) {
+            <mat-option [value]="ct">{{ ct }}</mat-option>
+          }
+        </mat-select>
+      </label>
+
+      <!-- Course selector (filtered by type/clinicaltype above) -->
+      <label class="flex items-center justify-between py-3 border-b border-white/5 cursor-pointer">
+        <span class="text-xs tracking-wide text-slate-400 uppercase">Course</span>
+        <mat-select multiple [ngModel]="selectedCourseIds()" (ngModelChange)="selectedCourseIds.set($event ?? [])"
+          name="courseIds" panelClass="seat-finder-select-panel"
+          [class]="'w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary'">
+          <mat-select-trigger>{{ courseSummary() }}</mat-select-trigger>
+          @for (c of courses(); track c.courseId) {
+          <mat-option [value]="c.courseId">{{ c.courseName }}</mat-option>
+          }
+        </mat-select>
+      </label>
+
+      <label class="flex items-center justify-between py-3 cursor-pointer"
+        [class.border-b]="!isStateQuota()" [class.border-white]="!isStateQuota()" [class.border-opacity-5]="!isStateQuota()">
+        @if (isStateQuota()) {
+          <span class="text-xs tracking-wide uppercase flex items-center gap-1"
+            [class.text-red-400]="stateError()" [class.text-slate-400]="!stateError()">
+            State <span class="text-red-400">*</span>
+          </span>
+          <mat-select
+            [ngModel]="selectedStateId()"
+            (ngModelChange)="selectedStateId.set($event); stateError.set(false)"
+            name="stateId"
+            panelClass="seat-finder-select-panel"
+            class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
+            <mat-select-trigger>{{ stateSummary() }}</mat-select-trigger>
+            @for (s of states(); track s.stateId) {
+              <mat-option [value]="s.stateId">{{ s.stateName }}</mat-option>
+            }
+          </mat-select>
+        } @else {
+          <span class="text-xs tracking-wide text-slate-400 uppercase">State (optional)</span>
+          <mat-select multiple [ngModel]="selectedStateIds()" (ngModelChange)="selectedStateIds.set($event ?? [])"
+            name="stateIds" panelClass="seat-finder-select-panel"
+            class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
+            <mat-select-trigger>{{ stateSummary() }}</mat-select-trigger>
+            @for (s of states(); track s.stateId) {
+              <mat-option [value]="s.stateId">{{ s.stateName }}</mat-option>
+            }
+          </mat-select>
+        }
+      </label>
+      @if (stateError()) {
+        <p class="text-xs text-red-400 px-0 pb-1">⚠ State is required for State Quota.</p>
+      }
+    </div>
+
+    <button type="submit"
+      class="self-start mt-1 px-5 py-2.5 rounded-lg bg-primary hover:bg-primary-dim text-white font-medium text-sm transition-colors">
+      Find my seats
+    </button>
+  </form>
+</div>

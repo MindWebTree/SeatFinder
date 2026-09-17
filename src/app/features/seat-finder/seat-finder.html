@@ -1,0 +1,145 @@
+<div class="max-w-3xl mx-auto px-4 py-10">
+
+  <div class="rounded-2xl overflow-hidden shadow-2xl">
+
+    <!-- Hero -->
+    <div class="bg-hero px-6 pt-6 pb-5">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-xs tracking-wider uppercase text-hero-deep font-medium">All India Quota · MCC 2025</p>
+          <h1 class="font-serif text-4xl font-bold text-ink mt-1">Seat Finder</h1>
+          <p class="text-ink/70 text-sm mt-2 leading-relaxed max-w-md">
+            Filter by course, category, institute type and state — see the closing rank for
+            every matching seat.
+          </p>
+        </div>
+
+        <!-- Profile chip -->
+        @if (loggedInName()) {
+        <div class="flex items-center gap-2 mt-1 shrink-0">
+          <div class="flex items-center gap-2 bg-ink/30 border border-white/10 rounded-full pl-2 pr-3 py-1.5">
+            <span
+              class="w-7 h-7 rounded-full bg-primary/30 text-primary flex items-center justify-center text-xs font-bold uppercase">
+              {{ loggedInName()!.charAt(0) }}
+            </span>
+            <span class="text-ink text-sm font-medium leading-none">{{ loggedInName() }}</span>
+          </div>
+          <button type="button" (click)="logout()" title="Logout"
+            class="w-8 h-8 flex items-center justify-center rounded-full bg-ink/20 hover:bg-red-500/20 border border-white/10 hover:border-red-500/30 text-ink/60 hover:text-red-400 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1" />
+            </svg>
+          </button>
+        </div>
+        } @else {
+        <!-- <button
+            type="button"
+            class="mt-1 shrink-0 flex items-center gap-1.5 px-4 py-2 rounded-full bg-ink/20 border border-white/20 hover:bg-ink/40 text-ink text-sm font-medium transition-colors"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            </svg>
+            Login / Register
+          </button> -->
+        }
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <app-seat-filters (search)="onSearch($event)" />
+
+    <!-- Summary bar -->
+    @if (state() === 'success' && result(); as r) {
+    <div class="bg-surface-alt px-6 py-4 flex items-center justify-between border-t border-white/5">
+      <div>
+        <p class="text-slate-100 font-semibold">{{ r.totalMatches }} seats match</p>
+        <p class="text-slate-400 text-sm">
+          {{ r.closedJustBeforeYou.length }} closed before you · {{ r.withinReach.length }} within reach
+        </p>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Results -->
+  <div class="mt-6 flex flex-col gap-6">
+    @switch (state()) {
+    @case ('loading') {
+    <div class="flex items-center justify-center py-16 text-slate-400 text-sm gap-2">
+      <span class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+      Searching seats…
+    </div>
+    }
+
+    @case ('error') {
+    <div class="bg-surface border border-red-500/20 rounded-lg px-4 py-3 text-red-300 text-sm">
+      {{ errorMessage() }}
+    </div>
+    }
+
+    @case ('success') {
+    @if (result(); as r) {
+    @if (r.totalMatches === 0 && lastQuota() === 'State Quota') {
+    <div class="bg-surface border border-white/10 rounded-lg px-4 py-5 text-slate-300 text-sm leading-relaxed">
+      <p class="font-medium text-slate-100 mb-1">No State Quota data yet</p>
+      <p>
+        This tool currently only has All India Quota (MCC) allotment data loaded.
+        State Quota seats are counselled separately by each state's own authority —
+        that data isn't in this database yet.
+      </p>
+    </div>
+    } @else {
+    <section class="flex flex-col gap-3">
+      <h2 class="text-amber text-sm font-medium">Closed just before you</h2>
+      @if (r.closedJustBeforeYou.length === 0) {
+      <p class="text-slate-500 text-sm">Nothing closed right before your rank — good sign.</p>
+      } @else {
+      <div class="grid grid-cols-1 md:grid-cols-1 gap-3">
+        @for (seat of r.closedJustBeforeYou | slice:0:visibleBefore(); track seat.seatId) {
+        <app-seat-card [seat]="seat" variant="nearMiss" />
+        }
+      </div>
+      @if (visibleBefore() < r.closedJustBeforeYou.length) { <button type="button"
+        (click)="visibleBefore.set(visibleBefore() + pageSize)"
+        class="mt-1 w-full py-3 rounded-xl bg-surface border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 hover:text-white transition-colors">
+        Show {{ r.closedJustBeforeYou.length - visibleBefore() > pageSize ? pageSize : r.closedJustBeforeYou.length -
+        visibleBefore() }} more · {{ r.closedJustBeforeYou.length - visibleBefore() }} remaining
+        </button>
+        }
+        }
+    </section>
+
+    <section class="flex flex-col gap-3">
+      <h2 class="text-emerald text-sm font-medium">Within reach</h2>
+      @if (r.withinReach.length === 0) {
+      <p class="text-slate-500 text-sm">No seats found within reach for these filters.</p>
+      } @else {
+      <div class="grid grid-cols-1 md:grid-cols-1 gap-3">
+        @for (seat of r.withinReach | slice:0:visibleReach(); track seat.seatId) {
+        <app-seat-card [seat]="seat" variant="reach" />
+        }
+      </div>
+      @if (visibleReach() < r.withinReach.length) { <button type="button"
+        (click)="visibleReach.set(visibleReach() + pageSize)"
+        class="mt-1 w-full py-3 rounded-xl bg-surface border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 hover:text-white transition-colors">
+        Show {{ r.withinReach.length - visibleReach() > pageSize ? pageSize : r.withinReach.length - visibleReach() }}
+        more · {{ r.withinReach.length - visibleReach() }} remaining
+        </button>
+        }
+        }
+    </section>
+    }
+    }
+    }
+
+    @default {
+    <div class="text-center py-10 text-slate-500 text-sm">
+      Enter your rank above and search to see results.
+    </div>
+    }
+    }
+  </div>
+
+</div>

@@ -1,0 +1,81 @@
+// =====================================================================
+// SINGLE SOURCE OF TRUTH for all UI colors in this app.
+// Change a value here -> both Tailwind utility classes (bg-hero, text-primary,
+// etc.) AND Angular Material components (buttons, selects, chips) update.
+// =====================================================================
+
+@use '@angular/material' as mat;
+
+// Angular Material's M3 theme needs a base tonal palette to derive its
+// structural tokens (elevation, state layers, etc.) from - "cyan" is the
+// closest built-in match to our teal/sky-blue brand color. We then override
+// the specific tokens below with our exact brand hex values, so the visible
+// color always comes from OUR palette, not the built-in one.
+html {
+  @include mat.theme((
+    color: mat.$cyan-palette,
+    typography: 'IBM Plex Sans',
+    density: 0,
+  ));
+}
+
+:root {
+  // ---- Brand palette (edit these) ----
+  --color-hero: #7ec6d9;         // light hero card background
+  --color-hero-deep: #3f7a8c;    // eyebrow / deep text on hero
+  --color-ink: #0d1b22;          // page background
+  --color-surface: #14242c;      // form card background
+  --color-surface-hover: #1b2f38; // elevated panels: dropdown/menu backgrounds
+  --color-surface-alt: #0f1e25;  // summary bar background
+  --color-primary: #5fa8be;      // input borders, links, chevrons
+  --color-primary-dim: #4a8a9d;
+  --color-amber: #d9822b;        // "closed just before you" + sample-data badge
+  --color-emerald: #34d399;      // "within reach"
+
+  // ---- Bridge our palette into Angular Material's system tokens ----
+  --mat-sys-primary: var(--color-primary);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: var(--color-hero);
+  --mat-sys-on-primary-container: var(--color-ink);
+  --mat-sys-surface: var(--color-surface);
+  --mat-sys-on-surface: #e7eef1;
+  --mat-sys-on-surface-variant: #aeb9c2;
+  --mat-sys-outline: rgba(255, 255, 255, 0.16);
+
+  // Elevated overlay surfaces (dropdown/select panels, menus, dialogs,
+  // autocomplete panels) read from these *-container tokens specifically,
+  // NOT from --mat-sys-surface above - easy to miss, and when missed the
+  // panel silently falls back to Material's default light background while
+  // the text color (on-surface, overridden above) stays light -> invisible
+  // light-on-light text. All four covered here so every Material overlay
+  // is consistent, not just mat-select.
+  --mat-sys-surface-container-lowest: var(--color-ink);
+  --mat-sys-surface-container-low: var(--color-surface);
+  --mat-sys-surface-container: var(--color-surface);
+  --mat-sys-surface-container-high: var(--color-surface-hover);
+  --mat-sys-surface-container-highest: var(--color-surface-hover);
+}
+
+@import "tailwindcss";
+
+@theme {
+  --color-hero: var(--color-hero);
+  --color-hero-deep: var(--color-hero-deep);
+  --color-ink: var(--color-ink);
+  --color-surface: var(--color-surface);
+  --color-surface-alt: var(--color-surface-alt);
+  --color-primary: var(--color-primary);
+  --color-primary-dim: var(--color-primary-dim);
+  --color-amber: var(--color-amber);
+  --color-emerald: var(--color-emerald);
+
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Source Serif 4", ui-serif, Georgia, serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+}
+
+body {
+  background-color: var(--color-ink);
+  font-family: var(--font-sans);
+  margin: 0;
+}

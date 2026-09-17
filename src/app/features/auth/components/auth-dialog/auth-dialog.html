@@ -1,0 +1,82 @@
+<div class="bg-surface text-slate-100 w-[360px] max-w-full p-6 rounded-2xl flex flex-col gap-5">
+
+  <div class="flex items-center justify-between">
+    <h2 class="text-lg font-semibold font-serif">
+      {{ mode() === 'signup' ? 'Create your account' : 'Log in' }}
+    </h2>
+    <button type="button" (click)="close()"
+      class="text-slate-500 hover:text-slate-300 text-xl leading-none">&times;</button>
+  </div>
+
+  <div class="flex rounded-lg overflow-hidden border border-white/10 text-sm">
+    <button type="button" (click)="switchMode('signup')" class="flex-1 py-2 transition-colors"
+      [class]="mode() === 'signup' ? 'bg-primary text-white' : 'text-slate-400 hover:text-slate-200'">Sign up</button>
+    <button type="button" (click)="switchMode('login')" class="flex-1 py-2 transition-colors"
+      [class]="mode() === 'login' ? 'bg-primary text-white' : 'text-slate-400 hover:text-slate-200'">Log in</button>
+  </div>
+
+  @if (errorMessage()) {
+  <p class="text-red-300 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{{ errorMessage() }}</p>
+  }
+
+  @if (step() === 'form') {
+  @if (mode() === 'signup') {
+  <div class="flex flex-col gap-3">
+    <label class="flex flex-col gap-1.5">
+      <span class="text-xs text-slate-400 uppercase tracking-wide">Full name</span>
+      <input type="text" [ngModel]="fullName()" (ngModelChange)="fullName.set($event)"
+        class="bg-ink border border-primary/30 rounded-lg px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/50" />
+    </label>
+    <label class="flex flex-col gap-1.5">
+      <span class="text-xs text-slate-400 uppercase tracking-wide">Email</span>
+      <input type="email" [ngModel]="email()" (ngModelChange)="email.set($event)"
+        class="bg-ink border border-primary/30 rounded-lg px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/50" />
+    </label>
+    <label class="flex flex-col gap-1.5">
+      <span class="text-xs text-slate-400 uppercase tracking-wide">Phone number</span>
+      <input type="tel" [ngModel]="phoneNumber()" (ngModelChange)="phoneNumber.set($event)"
+        class="bg-ink border border-primary/30 rounded-lg px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/50" />
+    </label>
+    <label class="flex flex-col gap-1.5">
+      <span class="text-xs text-slate-400 uppercase tracking-wide">State</span>
+      <mat-select [ngModel]="stateId()" (ngModelChange)="stateId.set($event)"
+        class="bg-ink border border-primary/30 rounded-lg px-3 py-2.5 text-slate-100">
+        @for (s of data.states; track s.stateId) {
+        <mat-option [value]="s.stateId">{{ s.stateName }}</mat-option>
+        }
+      </mat-select>
+    </label>
+    <p class="text-xs text-slate-500">We'll send a code to your email to verify it's you.</p>
+  </div>
+  } @else {
+  <label class="flex flex-col gap-1.5">
+    <span class="text-xs text-slate-400 uppercase tracking-wide">Email or phone number</span>
+    <input type="text" [ngModel]="loginIdentifier()" (ngModelChange)="loginIdentifier.set($event)"
+      placeholder="you@example.com or 98765xxxxx"
+      class="bg-ink border border-primary/30 rounded-lg px-3 py-2.5 text-slate-100 focus:outline-none focus:ring-2 focus:ring-primary/50" />
+  </label>
+  }
+
+  <button type="button" [disabled]="!canSendOtp() || submitting()" (click)="sendOtp()"
+    class="px-4 py-2.5 rounded-lg bg-primary hover:bg-primary-dim disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-sm transition-colors">
+    {{ submitting() ? 'Sending…' : 'Send code' }}
+  </button>
+  }
+
+  @if (step() === 'otp') {
+  <div class="flex flex-col gap-3">
+    <p class="text-sm text-slate-400">Enter the 6-digit code we sent you.</p>
+    <input type="text" inputmode="numeric" maxlength="6" [ngModel]="otpCode()" (ngModelChange)="otpCode.set($event)"
+      placeholder="000000"
+      class="bg-ink border border-primary/30 rounded-lg px-3 py-2.5 text-slate-100 font-mono text-lg tracking-[0.3em] text-center focus:outline-none focus:ring-2 focus:ring-primary/50" />
+    <button type="button" [disabled]="!otpCode().trim() || submitting()" (click)="verifyOtp()"
+      class="px-4 py-2.5 rounded-lg bg-primary hover:bg-primary-dim disabled:opacity-40 disabled:cursor-not-allowed text-white font-medium text-sm transition-colors">
+      {{ submitting() ? 'Verifying…' : (mode() === 'signup' ? 'Verify & create account' : 'Verify & log in') }}
+    </button>
+    <button type="button" (click)="step.set('form')" class="text-xs text-slate-500 hover:text-slate-300 self-start">
+      &larr; Change email/phone
+    </button>
+  </div>
+  }
+
+</div>
