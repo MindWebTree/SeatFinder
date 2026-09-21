@@ -1,15 +1,21 @@
-<div class="bg-surface rounded-b-2xl overflow-hidden">
+<div class="bg-surface rounded-b-2xl" style="overflow: clip">
 
-  <!-- Quota tabs -->
-  <div class="flex border-b border-white/5">
-    @for (opt of quotaOptions; track opt.value) {
-    <button type="button" (click)="onQuotaChange(opt.value)" class="flex-1 py-3 text-sm font-medium transition-colors"
-      [class]="quota() === opt.value
-          ? 'bg-primary/20 text-white border-b-2 border-primary'
-          : 'text-slate-400 hover:text-slate-200'">
-      {{ opt.label }}
-    </button>
-    }
+  <!-- Quota tabs — horizontally scrollable pill strip -->
+  <div class="relative border-b border-white/5">
+    <!-- fade hint on right edge -->
+    <div
+      class="pointer-events-none absolute right-0 top-0 h-full w-10 bg-gradient-to-l from-surface to-transparent z-10">
+    </div>
+    <div class="quota-scroll flex overflow-x-auto gap-1 px-3 py-2 pb-3">
+      @for (opt of quotaOptions; track opt.value) {
+      <button type="button" (click)="onQuotaChange(opt.value)"
+        class="shrink-0 px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap" [class]="quota() === opt.value
+            ? 'bg-primary text-white shadow-md shadow-primary/30'
+            : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'">
+        {{ opt.label }}
+      </button>
+      }
+    </div>
   </div>
 
   <form (ngSubmit)="submit()" class="px-6 py-6 flex flex-col gap-5">
@@ -61,13 +67,13 @@
       <!-- Course Type filter -->
       <label class="flex items-center justify-between py-3 border-b border-white/5 cursor-pointer">
         <span class="text-xs tracking-wide text-slate-400 uppercase">Course type</span>
-        <mat-select [ngModel]="selectedCourseType()" (ngModelChange)="onCourseTypeChange($event)"
-          name="courseType" panelClass="seat-finder-select-panel"
+        <mat-select [ngModel]="selectedCourseType()" (ngModelChange)="onCourseTypeChange($event)" name="courseType"
+          panelClass="seat-finder-select-panel"
           class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
           <mat-select-trigger>{{ selectedCourseType() ?? 'All types' }}</mat-select-trigger>
           <mat-option [value]="null">All types</mat-option>
           @for (t of courseTypes; track t) {
-            <mat-option [value]="t">{{ t }}</mat-option>
+          <mat-option [value]="t">{{ t }}</mat-option>
           }
         </mat-select>
       </label>
@@ -82,7 +88,7 @@
             {{ selectedClinicalTypes().length === 0 ? 'All' : selectedClinicalTypes().join(', ') }}
           </mat-select-trigger>
           @for (ct of clinicalTypes; track ct) {
-            <mat-option [value]="ct">{{ ct }}</mat-option>
+          <mat-option [value]="ct">{{ ct }}</mat-option>
           }
         </mat-select>
       </label>
@@ -100,39 +106,49 @@
         </mat-select>
       </label>
 
-      <label class="flex items-center justify-between py-3 cursor-pointer"
-        [class.border-b]="!isStateQuota()" [class.border-white]="!isStateQuota()" [class.border-opacity-5]="!isStateQuota()">
+      <label class="flex items-center justify-between py-3 cursor-pointer" [class.border-b]="!isStateQuota()"
+        [class.border-white]="!isStateQuota()" [class.border-opacity-5]="!isStateQuota()">
         @if (isStateQuota()) {
-          <span class="text-xs tracking-wide uppercase flex items-center gap-1"
-            [class.text-red-400]="stateError()" [class.text-slate-400]="!stateError()">
-            State <span class="text-red-400">*</span>
-          </span>
-          <mat-select
-            [ngModel]="selectedStateId()"
-            (ngModelChange)="selectedStateId.set($event); stateError.set(false)"
-            name="stateId"
-            panelClass="seat-finder-select-panel"
-            class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
-            <mat-select-trigger>{{ stateSummary() }}</mat-select-trigger>
-            @for (s of states(); track s.stateId) {
-              <mat-option [value]="s.stateId">{{ s.stateName }}</mat-option>
-            }
-          </mat-select>
+        <span class="text-xs tracking-wide uppercase flex items-center gap-1" [class.text-red-400]="stateError()"
+          [class.text-slate-400]="!stateError()">
+          State <span class="text-red-400">*</span>
+        </span>
+        <mat-select [ngModel]="selectedStateId()" (ngModelChange)="selectedStateId.set($event); stateError.set(false)"
+          name="stateId" panelClass="seat-finder-select-panel"
+          class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
+          <mat-select-trigger>{{ stateSummary() }}</mat-select-trigger>
+          @for (s of states(); track s.stateId) {
+          <mat-option [value]="s.stateId">{{ s.stateName }}</mat-option>
+          }
+        </mat-select>
         } @else {
-          <span class="text-xs tracking-wide text-slate-400 uppercase">State (optional)</span>
-          <mat-select multiple [ngModel]="selectedStateIds()" (ngModelChange)="selectedStateIds.set($event ?? [])"
-            name="stateIds" panelClass="seat-finder-select-panel"
-            class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
-            <mat-select-trigger>{{ stateSummary() }}</mat-select-trigger>
-            @for (s of states(); track s.stateId) {
-              <mat-option [value]="s.stateId">{{ s.stateName }}</mat-option>
-            }
-          </mat-select>
+        <span class="text-xs tracking-wide text-slate-400 uppercase">State (optional)</span>
+        <mat-select multiple [ngModel]="selectedStateIds()" (ngModelChange)="selectedStateIds.set($event ?? [])"
+          name="stateIds" panelClass="seat-finder-select-panel"
+          class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
+          <mat-select-trigger>{{ stateSummary() }}</mat-select-trigger>
+          @for (s of states(); track s.stateId) {
+          <mat-option [value]="s.stateId">{{ s.stateName }}</mat-option>
+          }
+        </mat-select>
         }
       </label>
       @if (stateError()) {
-        <p class="text-xs text-red-400 px-0 pb-1">⚠ State is required for State Quota.</p>
+      <p class="text-xs text-red-400 px-0 pb-1">⚠ State is required for State Quota.</p>
       }
+
+      <!-- Rounds filter -->
+      <label class="flex items-center justify-between py-3 border-t border-white/5 cursor-pointer gap-3">
+        <span class="text-xs tracking-wide text-slate-400 uppercase">Round</span>
+        <mat-select multiple [ngModel]="selectedRounds()" (ngModelChange)="selectedRounds.set($event ?? [])"
+          name="rounds" panelClass="seat-finder-select-panel"
+          class="w-auto text-primary text-sm justify-end [&_.mat-mdc-select-value]:text-primary [&_.mat-mdc-select-arrow]:text-primary">
+          <mat-select-trigger>{{ roundSummary() }}</mat-select-trigger>
+          @for (r of roundOptions; track r.value) {
+          <mat-option [value]="r.value">{{ r.label }}</mat-option>
+          }
+        </mat-select>
+      </label>
     </div>
 
     <button type="submit"

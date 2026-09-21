@@ -23,7 +23,7 @@
       === 1 ? '' : 's' }}</span>
   </div>
 
-  <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/5">
+  <div class="grid grid-cols-4 gap-2 pt-2 border-t border-white/5">
     <div>
       <div class="text-slate-500 text-[11px]">Round 1</div>
       <div class="font-mono text-slate-200 text-sm">{{ seat().round1ClosingRank ?? '—' }}</div>
@@ -35,6 +35,10 @@
     <div>
       <div class="text-slate-500 text-[11px]">Round 3</div>
       <div class="font-mono text-slate-200 text-sm">{{ seat().round3ClosingRank ?? '—' }}</div>
+    </div>
+    <div>
+      <div class="text-slate-500 text-[11px]">Stray Round</div>
+      <div class="font-mono text-slate-200 text-sm">{{ seat().strayVacancyClosingRank ?? '—' }}</div>
     </div>
   </div>
 

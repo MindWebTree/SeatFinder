@@ -15,6 +15,8 @@ import {
   CourseDto,
   INSTITUTE_TYPE_OPTIONS,
   QUOTA_OPTIONS,
+  ROUND_OPTIONS,
+  RoundValue,
   SeatFinderRequest,
   StateDto
 } from '../../../../core/models/counselling.models';
@@ -53,6 +55,10 @@ export class SeatFiltersComponent implements OnInit {
   protected readonly selectedStateId = signal<number | null>(null); // used for State Quota (single)
   protected readonly stateError = signal<boolean>(false);
 
+  protected readonly roundOptions = ROUND_OPTIONS;
+  // Default: all rounds selected
+  protected readonly selectedRounds = signal<RoundValue[]>([1, 2, 3, 4]);
+
   // New course-type filters
   protected readonly selectedCourseType = signal<string | null>(null);
   protected readonly selectedClinicalTypes = signal<string[]>([]);
@@ -83,6 +89,14 @@ export class SeatFiltersComponent implements OnInit {
     return n === 0 ? 'All India' : n === 1
       ? this.states().find((s) => s.stateId === this.selectedStateIds()[0])?.stateName ?? '1 selected'
       : `${n} states selected`;
+  });
+
+  protected readonly roundSummary = computed(() => {
+    const selected = this.selectedRounds();
+    if (selected.length === 0 || selected.length === ROUND_OPTIONS.length) return 'All rounds';
+    return selected
+      .map(v => ROUND_OPTIONS.find(r => r.value === v)?.label ?? `Round ${v}`)
+      .join(', ');
   });
 
   /** Called when the quota tab changes — clears state selection and error. */
@@ -164,13 +178,16 @@ export class SeatFiltersComponent implements OnInit {
       ? (this.selectedStateId() ? String(this.selectedStateId()) : undefined)
       : (this.selectedStateIds().length ? this.selectedStateIds().join(',') : undefined);
 
+    const allRoundsSelected = this.selectedRounds().length === 0 || this.selectedRounds().length === ROUND_OPTIONS.length;
+
     this.search.emit({
       rank: rankValue,
       category: this.category(),
       instituteTypes: this.selectedInstituteTypes().length ? this.selectedInstituteTypes().join(',') : undefined,
       courseIds: this.selectedCourseIds().length ? this.selectedCourseIds().join(',') : undefined,
       stateIds,
-      quota: this.quota()
+      quota: this.quota(),
+      rounds: allRoundsSelected ? undefined : this.selectedRounds().join(',')
     });
   }
 }

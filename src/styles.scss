@@ -79,3 +79,32 @@ body {
   font-family: var(--font-sans);
   margin: 0;
 }
+
+/* Hide scrollbar while keeping scroll behaviour */
+.scrollbar-none {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+/* Thin styled scrollbar for the quota pill strip */
+.quota-scroll {
+  scrollbar-width: thin;                        /* Firefox */
+  scrollbar-color: var(--color-primary) rgba(255,255,255,0.06); /* Firefox thumb / track */
+
+  &::-webkit-scrollbar {
+    height: 3px;                                /* Chrome / Safari — horizontal bar height */
+  }
+  &::-webkit-scrollbar-track {
+    background: rgba(255,255,255,0.06);
+    border-radius: 99px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: var(--color-primary);
+    border-radius: 99px;
+    opacity: 0.8;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    opacity: 1;
+  }
+}

@@ -33,6 +33,9 @@ export class CounsellingService {
     if (request.quota) {
       params = params.set('Quota', request.quota);
     }
+    if (request.rounds) {
+      params = params.set('Rounds', request.rounds);
+    }
 
     return this.http
       .get<ApiResponse<SeatFinderResponse>>(`${this.base}/seat-finder`, { params })
