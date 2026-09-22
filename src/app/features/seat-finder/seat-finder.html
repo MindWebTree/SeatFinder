@@ -91,8 +91,37 @@
       </p>
     </div>
     } @else {
+    <!-- Tab bar -->
+    <div class="flex border-b border-white/10 mb-4">
+      <button type="button"
+        (click)="activeTab.set('before')"
+        [class]="activeTab() === 'before'
+          ? 'flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-amber border-b-2 border-amber -mb-px transition-colors'
+          : 'flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-400 border-b-2 border-transparent -mb-px hover:text-slate-200 transition-colors'">
+        Closed just before you
+        <span [class]="activeTab() === 'before'
+          ? 'inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-amber/20 text-amber text-xs font-semibold'
+          : 'inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-white/10 text-slate-400 text-xs font-semibold'">
+          {{ r.closedJustBeforeYou.length }}
+        </span>
+      </button>
+      <button type="button"
+        (click)="activeTab.set('reach')"
+        [class]="activeTab() === 'reach'
+          ? 'flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-emerald border-b-2 border-emerald -mb-px transition-colors'
+          : 'flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-400 border-b-2 border-transparent -mb-px hover:text-slate-200 transition-colors'">
+        Within reach
+        <span [class]="activeTab() === 'reach'
+          ? 'inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-emerald/20 text-emerald text-xs font-semibold'
+          : 'inline-flex items-center justify-center min-w-[1.25rem] h-5 px-1 rounded-full bg-white/10 text-slate-400 text-xs font-semibold'">
+          {{ r.withinReach.length }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Closed just before you -->
+    @if (activeTab() === 'before') {
     <section class="flex flex-col gap-3">
-      <h2 class="text-amber text-sm font-medium">Closed just before you</h2>
       @if (r.closedJustBeforeYou.length === 0) {
       <p class="text-slate-500 text-sm">Nothing closed right before your rank — good sign.</p>
       } @else {
@@ -110,9 +139,11 @@
         }
         }
     </section>
+    }
 
+    <!-- Within reach -->
+    @if (activeTab() === 'reach') {
     <section class="flex flex-col gap-3">
-      <h2 class="text-emerald text-sm font-medium">Within reach</h2>
       @if (r.withinReach.length === 0) {
       <p class="text-slate-500 text-sm">No seats found within reach for these filters.</p>
       } @else {
@@ -130,6 +161,7 @@
         }
         }
     </section>
+    }
     }
     }
     }

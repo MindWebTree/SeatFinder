@@ -34,13 +34,17 @@ export class SeatFinderComponent {
   protected readonly visibleReach = signal(PAGE_SIZE);
   protected readonly pageSize = PAGE_SIZE;
 
+  // Active tab for results: 'before' = Closed just before you, 'reach' = Within reach.
+  protected readonly activeTab = signal<'before' | 'reach'>('before');
+
   protected onSearch(request: SeatFinderRequest): void {
     this.state.set('loading');
     this.errorMessage.set('');
     this.lastQuota.set(request.quota);
-    // Reset pagination on every new search.
+    // Reset pagination and tab on every new search.
     this.visibleBefore.set(PAGE_SIZE);
     this.visibleReach.set(PAGE_SIZE);
+    this.activeTab.set('before');
 
     this.counsellingService.searchSeats(request).subscribe({
       next: (response) => {
