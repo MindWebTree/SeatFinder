@@ -1,0 +1,252 @@
+<div class="bg-surface rounded-b-2xl" style="overflow: clip">
+
+  <form (ngSubmit)="submit()" class="px-6 py-6 flex flex-col gap-5">
+
+    <!-- COURSE -->
+    <div class="flex flex-col gap-1.5">
+      <span class="text-xs tracking-wide text-slate-400 uppercase">Course</span>
+
+      @if (!selectedCourseGuid()) {
+      <!-- Closed state: show as a dropdown-like selector -->
+      <mat-select
+        [ngModel]="selectedCourseGuid()"
+        (ngModelChange)="onCourseChange($event)"
+        name="course"
+        panelClass="seat-finder-select-panel"
+        placeholder="Select a course"
+        class="w-full bg-ink border border-primary/30 rounded-lg px-4 py-3 text-slate-100 focus:outline-none">
+        <mat-select-trigger>{{ selectedCourse()?.courseName ?? 'Select a course' }}</mat-select-trigger>
+        @for (c of courses(); track c.courseGuid) {
+        <mat-option [value]="c.courseGuid">{{ c.courseName }}</mat-option>
+        }
+      </mat-select>
+      } @else {
+      <!-- Selected: pill with clear button -->
+      <div class="flex items-center gap-2 bg-ink border border-primary/30 rounded-lg px-4 py-2.5">
+        <span class="w-4 h-4 shrink-0 text-primary">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+          </svg>
+        </span>
+        <span class="flex-1 text-slate-100 text-sm min-w-0 truncate">{{ selectedCourse()?.courseName }}</span>
+        <div class="shrink-0 flex items-center gap-1.5 text-xs text-slate-500">
+          <span>{{ selectedCourse()?.collegeCount }} colleges</span>
+          <span>·</span>
+          <span>{{ selectedCourse()?.totalSeats }} seats</span>
+        </div>
+        <button type="button" (click)="clearCourse()"
+          class="shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-slate-400 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      }
+    </div>
+
+    <!-- STATE (only after course selected) -->
+    @if (selectedCourseGuid()) {
+    <div class="flex flex-col gap-1.5">
+      <span class="text-xs tracking-wide text-slate-400 uppercase">State</span>
+
+      @if (statesLoading()) {
+      <div class="flex items-center gap-2 px-4 py-3 bg-ink rounded-lg border border-white/5 text-slate-500 text-sm">
+        <span class="w-3.5 h-3.5 border-2 border-primary/40 border-t-transparent rounded-full animate-spin"></span>
+        Loading states…
+      </div>
+      } @else if (!selectedStateGuid()) {
+      <mat-select
+        [ngModel]="selectedStateGuid()"
+        (ngModelChange)="onStateChange($event)"
+        name="state"
+        panelClass="seat-finder-select-panel"
+        placeholder="All states"
+        class="w-full bg-ink border border-primary/30 rounded-lg px-4 py-3 text-slate-100">
+        <mat-select-trigger>
+          <span class="flex items-center gap-1.5">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+            </svg>
+            All states
+          </span>
+        </mat-select-trigger>
+        <mat-option [value]="null">All states</mat-option>
+        @for (s of states(); track s.stateGuid) {
+        <mat-option [value]="s.stateGuid">{{ s.stateName }} ({{ s.collegeCount }})</mat-option>
+        }
+      </mat-select>
+      } @else {
+      <!-- Selected state pill -->
+      <div class="flex items-center gap-2 bg-ink border border-primary/30 rounded-lg px-4 py-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+        </svg>
+        <span class="flex-1 text-slate-100 text-sm min-w-0 truncate">{{ selectedState()?.stateName }}</span>
+        <div class="shrink-0 text-xs text-slate-500">
+          {{ selectedState()?.collegeCount }} colleges
+        </div>
+        <button type="button" (click)="clearState()"
+          class="shrink-0 w-5 h-5 flex items-center justify-center rounded-full bg-white/10 hover:bg-white/20 text-slate-400 hover:text-white transition-colors">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      }
+    </div>
+
+    <!-- MANAGEMENT -->
+    <div class="flex flex-col gap-2">
+      <span class="text-xs tracking-wide text-slate-400 uppercase">Management</span>
+      <div class="flex flex-wrap gap-2">
+        @for (opt of managementOptions; track opt) {
+        <button type="button" (click)="onManagementChange(opt)"
+          class="px-4 py-1.5 rounded-full text-xs font-medium transition-all whitespace-nowrap"
+          [class]="selectedManagement() === opt
+            ? 'bg-primary text-white shadow-md shadow-primary/30'
+            : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'">
+          {{ opt }}
+        </button>
+        }
+      </div>
+    </div>
+
+    <!-- COLLEGE NAME -->
+    <div class="flex flex-col gap-1.5">
+      <span class="text-xs tracking-wide text-slate-400 uppercase">College Name</span>
+      <button type="button" (click)="openCollegePicker()"
+        class="flex items-center gap-2 w-full bg-ink border border-primary/30 rounded-lg px-4 py-2.5 text-left hover:border-primary/60 transition-colors">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+        </svg>
+        <span class="flex-1 text-sm" [class]="selectedCollege() ? 'text-slate-100' : 'text-slate-500'">
+          {{ selectedCollege()?.collegeName ?? 'All colleges' }}
+        </span>
+        @if (collegesLoading()) {
+        <span class="w-3.5 h-3.5 border-2 border-primary/40 border-t-transparent rounded-full animate-spin shrink-0"></span>
+        } @else {
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 shrink-0 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+        </svg>
+        }
+      </button>
+      @if (!selectedCourseGuid()) {
+      <p class="text-xs text-slate-600">Tap to pick — select a course first.</p>
+      } @else {
+      <p class="text-xs text-slate-600">Tap to pick — you can search inside.</p>
+      }
+    </div>
+    }
+
+    <!-- Actions -->
+    <div class="flex items-center gap-3 pt-1">
+      <button type="submit" [disabled]="!canSearch()"
+        class="flex-1 py-3 rounded-xl font-medium text-sm transition-all flex items-center justify-center gap-2"
+        [class]="canSearch()
+          ? 'bg-primary hover:bg-primary-dim text-white shadow-lg shadow-primary/20'
+          : 'bg-white/5 text-slate-600 cursor-not-allowed'">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+        </svg>
+        Find colleges →
+      </button>
+      @if (selectedCourseGuid()) {
+      <button type="button" (click)="resetFilters()"
+        class="px-4 py-3 rounded-xl text-sm text-slate-400 hover:text-slate-200 transition-colors underline underline-offset-2">
+        Reset filters
+      </button>
+      }
+    </div>
+
+  </form>
+</div>
+
+<!-- ── College Picker Bottom Sheet / Modal ─────────────────────────────── -->
+@if (showCollegePicker()) {
+<div class="fixed inset-0 z-40" (click)="closeCollegePicker()">
+  <div class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+</div>
+<div class="fixed inset-x-4 bottom-4 sm:inset-auto sm:top-1/2 sm:left-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:w-full sm:max-w-md z-50 bg-surface rounded-2xl shadow-2xl border border-white/10 overflow-hidden flex flex-col max-h-[75vh]">
+
+  <!-- Picker header -->
+  <div class="px-5 pt-5 pb-4 border-b border-white/5 shrink-0">
+    <div class="w-10 h-1 rounded-full bg-white/20 mx-auto mb-4 sm:hidden"></div>
+    <h3 class="text-slate-100 font-semibold text-base">Select college</h3>
+    @if (selectedCourse(); as c) {
+    <p class="text-slate-500 text-xs mt-0.5">
+      {{ colleges().length }} colleges match {{ c.shortName }}
+      @if (selectedState()) { · {{ selectedState()?.stateName }} }
+    </p>
+    }
+
+    <!-- Search box -->
+    <div class="relative mt-3">
+      <svg xmlns="http://www.w3.org/2000/svg"
+        class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none"
+        fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+      </svg>
+      <input type="text" [ngModel]="collegeSearch()" (ngModelChange)="collegeSearch.set($event)"
+        name="collegeSearchInput" placeholder="Search colleges…" autocomplete="off"
+        class="w-full bg-ink border border-white/10 rounded-xl pl-9 pr-8 py-2.5 text-slate-100 text-sm placeholder:text-slate-600 focus:outline-none focus:ring-1 focus:ring-primary/50 focus:border-primary/50 transition-colors" />
+      @if (collegeSearch()) {
+      <button type="button" (click)="collegeSearch.set('')"
+        class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 flex items-center justify-center text-slate-500 hover:text-slate-300">
+        <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+      }
+    </div>
+
+    @if (collegeSearch()) {
+    <p class="text-xs text-slate-500 mt-2">{{ filteredColleges().length }} of {{ colleges().length }} match "{{ collegeSearch() }}"</p>
+    }
+  </div>
+
+  <!-- Options list -->
+  <div class="overflow-y-auto flex-1 px-4 py-3 flex flex-col gap-1">
+
+    <!-- "All colleges" option -->
+    <button type="button" (click)="selectCollege(null)"
+      class="flex items-start gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-colors hover:bg-white/5"
+      [class]="!selectedCollegeGuid() ? 'bg-primary/10' : ''">
+      <span class="mt-0.5 w-4 h-4 shrink-0 rounded-full border-2 flex items-center justify-center"
+        [class]="!selectedCollegeGuid() ? 'border-primary bg-primary' : 'border-white/20'">
+        @if (!selectedCollegeGuid()) {
+        <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+        }
+      </span>
+      <div>
+        <p class="text-slate-100 text-sm font-medium">All colleges</p>
+        <p class="text-slate-500 text-xs">Don't narrow by college</p>
+      </div>
+    </button>
+
+    @for (college of filteredColleges(); track college.collegeGuid) {
+    <button type="button" (click)="selectCollege(college.collegeGuid)"
+      class="flex items-start gap-3 w-full px-3 py-2.5 rounded-xl text-left transition-colors hover:bg-white/5"
+      [class]="selectedCollegeGuid() === college.collegeGuid ? 'bg-primary/10' : ''">
+      <span class="mt-0.5 w-4 h-4 shrink-0 rounded-full border-2 flex items-center justify-center"
+        [class]="selectedCollegeGuid() === college.collegeGuid ? 'border-primary bg-primary' : 'border-white/20'">
+        @if (selectedCollegeGuid() === college.collegeGuid) {
+        <span class="w-1.5 h-1.5 rounded-full bg-white"></span>
+        }
+      </span>
+      <div class="min-w-0">
+        <p class="text-slate-100 text-sm font-medium leading-snug">
+          <!-- Highlight matching part -->
+          {{ college.collegeName }}
+        </p>
+        <p class="text-slate-500 text-xs mt-0.5">{{ college.city }} · {{ college.category }}</p>
+      </div>
+    </button>
+    }
+
+    @if (filteredColleges().length === 0 && colleges().length > 0) {
+    <p class="text-center text-slate-600 text-sm py-6">No colleges match "{{ collegeSearch() }}"</p>
+    }
+  </div>
+
+</div>
+}

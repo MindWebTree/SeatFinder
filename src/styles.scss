@@ -108,3 +108,54 @@ body {
     opacity: 1;
   }
 }
+
+/* ── Bottom Tab Bar ────────────────────────────────────────────────────────── */
+
+/* Safe area for iOS home bar */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Default tab item */
+.tab-item {
+  color: #64748b; /* slate-500 */
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: #cbd5e1; /* slate-300 */
+  }
+
+  /* Active indicator bar at the top of the tab */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 2px;
+    border-radius: 0 0 4px 4px;
+    background: transparent;
+    transition: background 0.2s ease;
+  }
+
+  .tab-icon {
+    transition: transform 0.2s ease, color 0.15s ease;
+  }
+
+  .tab-label {
+    transition: color 0.15s ease;
+  }
+}
+
+/* Active tab state (added by routerLinkActive) */
+.tab-active {
+  color: var(--color-primary) !important;
+
+  &::before {
+    background: var(--color-primary);
+  }
+
+  .tab-icon {
+    transform: translateY(-1px);
+  }
+}

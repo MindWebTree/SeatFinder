@@ -1,0 +1,105 @@
+<div class="max-w-3xl mx-auto px-4 py-10">
+
+  <div class="rounded-2xl overflow-hidden shadow-2xl">
+
+    <!-- Hero -->
+    <div class="bg-hero px-6 pt-6 pb-5">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <img src="logo.png" alt="AdrPlexus" class="h-24 mb-2" />
+          <p class="text-xs uppercase tracking-widest text-ink/50 font-medium mb-1">College Directory · AY 2026-27</p>
+          <h1 class="font-serif text-4xl font-bold text-ink mt-1">Find Colleges</h1>
+          <p class="text-ink/70 text-sm mt-2 leading-relaxed max-w-md">
+            Every college that offers a course — narrow it by state and management. No rank needed.
+          </p>
+
+          <!-- Data badge -->
+          <div class="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-ink/20 border border-white/10 text-ink/60 text-xs">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Data as of 17 Sep 2026
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <app-cf-filters (search)="onSearch($event)" />
+
+    <!-- Summary bar -->
+    @if (state() === 'success' && result(); as r) {
+    <div class="bg-surface-alt px-6 py-4 flex items-center justify-between border-t border-white/5 flex-wrap gap-3">
+      <div>
+        <p class="text-slate-100 font-semibold">{{ r.totalCount }} college{{ r.totalCount === 1 ? '' : 's' }}</p>
+        <p class="text-slate-400 text-sm">{{ r.totalSeats }} total seats</p>
+      </div>
+      <!-- Example data chips placeholder -->
+      <div class="flex flex-wrap gap-1.5 text-xs">
+        <span class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400">{{ r.items[0]?.courseShortName ?? '' }}</span>
+        @if (r.items[0]?.stateName) {
+        <span class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400">{{ r.items[0]?.stateName }}</span>
+        }
+      </div>
+    </div>
+    }
+
+  </div>
+
+  <!-- Results -->
+  <div class="mt-6 flex flex-col gap-4">
+    @switch (state()) {
+
+    @case ('loading') {
+    <div class="flex items-center justify-center py-16 text-slate-400 text-sm gap-2">
+      <span class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></span>
+      Searching colleges…
+    </div>
+    }
+
+    @case ('error') {
+    <div class="bg-surface border border-red-500/20 rounded-lg px-4 py-3 text-red-300 text-sm">
+      {{ errorMessage() }}
+    </div>
+    }
+
+    @case ('success') {
+    @if (result(); as r) {
+    @if (r.totalCount === 0) {
+    <div class="bg-surface border border-white/10 rounded-lg px-4 py-5 text-slate-300 text-sm leading-relaxed text-center">
+      <p class="font-medium text-slate-100 mb-1">No colleges found</p>
+      <p>Try changing the state or management filter.</p>
+    </div>
+    } @else {
+    <div class="grid grid-cols-1 gap-3">
+      @for (item of r.items; track item.collegeGuid) {
+      <app-cf-college-card [item]="item" (viewDetail)="openDetail($event)" />
+      }
+    </div>
+
+    <!-- Load more -->
+    @if (r.hasMore) {
+    <button type="button" (click)="loadMore()" [disabled]="loadingMore()"
+      class="w-full py-3 rounded-xl bg-surface border border-white/10 text-slate-300 text-sm font-medium hover:bg-white/5 hover:text-white transition-colors flex items-center justify-center gap-2">
+      @if (loadingMore()) {
+      <span class="w-4 h-4 border-2 border-primary/40 border-t-transparent rounded-full animate-spin"></span>
+      Loading…
+      } @else {
+      Load more · {{ r.totalCount - r.items.length }} remaining
+      }
+    </button>
+    }
+    }
+    }
+    }
+
+    @default {
+    <div class="text-center py-10 text-slate-500 text-sm">
+      Select a course above to find matching colleges.
+    </div>
+    }
+
+    }
+  </div>
+
+</div>
