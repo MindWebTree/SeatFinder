@@ -12,6 +12,10 @@ import {
 } from '../models/counselling.models';
 
 export interface CFSearchRequest {
+  /**
+   * Comma-separated course GUIDs, e.g. "guid1,guid2".
+   * Empty string means "All Courses".
+   */
   courseGuid: string;
   stateGuid?: string;
   category?: string;
@@ -32,17 +36,19 @@ export class CollegeFinderService {
       .pipe(map((res) => res.data));
   }
 
-  /** Step 2 – States available for a given course. */
-  getStates(courseGuid: string): Observable<CFStateDto[]> {
-    const params = new HttpParams().set('courseGuid', courseGuid);
+  /** Step 2 – States for a given set of course GUIDs (empty = all courses). */
+  getStates(courseGuids: string[]): Observable<CFStateDto[]> {
+    let params = new HttpParams();
+    for (const g of courseGuids) params = params.append('courseGuids', g);
     return this.http
       .get<ApiResponse<CFStateDto[]>>(`${this.base}/states`, { params })
       .pipe(map((res) => res.data));
   }
 
-  /** Step 3 – Colleges for a given course + state combo (for the dropdown). */
-  getColleges(courseGuid: string, stateGuid?: string, category?: string, search?: string): Observable<CFCollegeListItemDto[]> {
-    let params = new HttpParams().set('courseGuid', courseGuid);
+  /** Step 3 – Colleges for a given set of courses + optional state/category. */
+  getColleges(courseGuids: string[], stateGuid?: string, category?: string, search?: string): Observable<CFCollegeListItemDto[]> {
+    let params = new HttpParams();
+    for (const g of courseGuids) params = params.append('courseGuids', g);
     if (stateGuid) params = params.set('stateGuid', stateGuid);
     if (category) params = params.set('category', category);
     if (search) params = params.set('search', search);
@@ -53,7 +59,11 @@ export class CollegeFinderService {
 
   /** Step 4 – Paginated search results. */
   search(req: CFSearchRequest): Observable<CFSearchResponse> {
-    let params = new HttpParams().set('CourseGuid', req.courseGuid);
+    let params = new HttpParams();
+    if (req.courseGuid) {
+      const guids = req.courseGuid.split(',').map((g) => g.trim()).filter(Boolean);
+      for (const g of guids) params = params.append('CourseGuids', g);
+    }
     if (req.stateGuid) params = params.set('StateGuid', req.stateGuid);
     if (req.category) params = params.set('Category', req.category);
     if (req.collegeGuid) params = params.set('CollegeGuid', req.collegeGuid);

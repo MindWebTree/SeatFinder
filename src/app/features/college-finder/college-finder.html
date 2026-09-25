@@ -2,24 +2,42 @@
 
   <div class="rounded-2xl overflow-hidden shadow-2xl">
 
-    <!-- Hero -->
-    <div class="bg-hero px-6 pt-6 pb-5">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <img src="logo.png" alt="AdrPlexus" class="h-24 mb-2" />
-          <p class="text-xs uppercase tracking-widest text-ink/50 font-medium mb-1">College Directory · AY 2026-27</p>
-          <h1 class="font-serif text-4xl font-bold text-ink mt-1">Find Colleges</h1>
-          <p class="text-ink/70 text-sm mt-2 leading-relaxed max-w-md">
-            Every college that offers a course — narrow it by state and management. No rank needed.
-          </p>
+    <!-- Hero — Aurora animated banner -->
+    <div class="hero-aurora px-6 pt-6 pb-5" style="min-height: 130px;">
 
+      <!-- Floating star particles -->
+      <div class="aurora-particles">
+        <span class="particle"></span><span class="particle"></span>
+        <span class="particle"></span><span class="particle"></span>
+        <span class="particle"></span><span class="particle"></span>
+        <span class="particle"></span><span class="particle"></span>
+        <span class="particle"></span><span class="particle"></span>
+        <span class="particle"></span><span class="particle"></span>
+      </div>
+      <div class="aurora-pulse-ring" style="width:80px;height:80px;top:18px;left:18px;animation-delay:0s;"></div>
+      <div class="aurora-pulse-ring" style="width:80px;height:80px;top:18px;left:18px;animation-delay:2.5s;"></div>
+
+      <div class="aurora-content flex items-start justify-between gap-4">
+        <div>
+          <img src="logo.png" alt="AdrPlexus" class="h-24 mb-2"
+            style="filter: drop-shadow(0 0 12px rgba(94,198,220,0.5));" />
+          <p class="text-xs uppercase tracking-widest font-medium mb-1" style="color:rgba(126,198,217,0.6);">College
+            Directory · AY 2026-27</p>
+          <h1 class="font-serif text-4xl font-bold mt-1"
+            style="color:#e0f4fa; text-shadow: 0 0 24px rgba(94,198,220,0.4);">Find Colleges</h1>
+          <p class="text-sm mt-2 leading-relaxed max-w-md" style="color:rgba(180,220,235,0.80);">
+            Every college that offers a course — narrow by state and management. No rank needed.
+          </p>
           <!-- Data badge -->
-          <div class="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full bg-ink/20 border border-white/10 text-ink/60 text-xs">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          <!-- <div class="inline-flex items-center gap-1.5 mt-3 px-3 py-1 rounded-full text-xs"
+            style="background:rgba(13,27,34,0.45);border:1px solid rgba(255,255,255,0.10);color:rgba(180,220,235,0.55);backdrop-filter:blur(8px);">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
             Data as of 17 Sep 2026
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -35,12 +53,12 @@
         <p class="text-slate-400 text-sm">{{ r.totalSeats }} total seats</p>
       </div>
       <!-- Example data chips placeholder -->
-      <div class="flex flex-wrap gap-1.5 text-xs">
+      <!-- <div class="flex flex-wrap gap-1.5 text-xs">
         <span class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400">{{ r.items[0]?.courseShortName ?? '' }}</span>
         @if (r.items[0]?.stateName) {
         <span class="px-2.5 py-1 rounded-full bg-white/5 text-slate-400">{{ r.items[0]?.stateName }}</span>
         }
-      </div>
+      </div> -->
     </div>
     }
 
@@ -66,7 +84,8 @@
     @case ('success') {
     @if (result(); as r) {
     @if (r.totalCount === 0) {
-    <div class="bg-surface border border-white/10 rounded-lg px-4 py-5 text-slate-300 text-sm leading-relaxed text-center">
+    <div
+      class="bg-surface border border-white/10 rounded-lg px-4 py-5 text-slate-300 text-sm leading-relaxed text-center">
       <p class="font-medium text-slate-100 mb-1">No colleges found</p>
       <p>Try changing the state or management filter.</p>
     </div>
@@ -95,7 +114,7 @@
 
     @default {
     <div class="text-center py-10 text-slate-500 text-sm">
-      Select a course above to find matching colleges.
+      Choose course(s) or search All Courses to find matching colleges.
     </div>
     }
 
